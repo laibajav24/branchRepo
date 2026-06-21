@@ -81,9 +81,28 @@
             margin-bottom: 15px;
         }
 
+        /* Group layout to fit label, slider, and number box in the same row */
+        .length-control-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+            justify-content: flex-end;
+            max-width: 65%;
+        }
+
         label {
             color: #cbd5e1;
             font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            accent-color: #38bdf8;
+            cursor: pointer;
+            height: 6px;
+            border-radius: 3px;
         }
 
         input[type="number"] {
@@ -91,7 +110,7 @@
             border: 1px solid #334155;
             color: #fff;
             padding: 5px;
-            width: 60px;
+            width: 55px;
             border-radius: 4px;
             text-align: center;
         }
@@ -134,9 +153,13 @@
         </div>
 
         <div class="settings">
+            <!-- Modifed layout line: Label, Slider, and Number input stay perfectly inline -->
             <div class="setting">
-                <label>Password Length</label>
-                <input type="number" id="length" min="4" max="50" value="12">
+                <label>Length</label>
+                <div class="length-control-group">
+                    <input type="range" id="lengthSlider" min="4" max="50" value="12">
+                    <input type="number" id="length" min="4" max="50" value="12">
+                </div>
             </div>
             <div class="setting">
                 <label>Include Uppercase Letters (A-Z)</label>
@@ -162,6 +185,7 @@
     <script>
         const passwordEl = document.getElementById('password');
         const lengthEl = document.getElementById('length');
+        const lengthSliderEl = document.getElementById('lengthSlider');
         const uppercaseEl = document.getElementById('uppercase');
         const lowercaseEl = document.getElementById('lowercase');
         const numbersEl = document.getElementById('numbers');
@@ -174,13 +198,25 @@
         const numberChars = '0123456789';
         const symbolChars = '!@#$%^&*()_+~`|}{[]:;?><,./-=';
 
+        // Connect the slider and the number box together
+        lengthSliderEl.addEventListener('input', (e) => {
+            lengthEl.value = e.target.value;
+        });
+        
+        lengthEl.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value);
+            if (!isNaN(val) && val >= 4 && val <= 50) {
+                lengthSliderEl.value = val;
+            }
+        });
+
         function generatePassword() {
             let length = parseInt(lengthEl.value);
             
-            // Limit checks to prevent crashes
             if (isNaN(length) || length < 4) length = 4;
             if (length > 50) length = 50;
             lengthEl.value = length;
+            lengthSliderEl.value = length;
 
             let allowedChars = '';
             let mandatoryChars = [];
@@ -215,14 +251,12 @@
                 generatedPassword.push(allowedChars[randomIndex]);
             }
 
-            // Shuffle pool to avoid predictable structures
             generatedPassword = generatedPassword.sort(() => Math.random() - 0.5);
 
             passwordEl.innerText = generatedPassword.join('');
             copyBtn.innerText = 'Copy';
         }
 
-        // Copy functionality
         copyBtn.addEventListener('click', () => {
             const password = passwordEl.innerText;
             if (password === 'Click Generate' || password === 'Select at least 1 option') {
@@ -241,3 +275,4 @@
     </script>
 </body>
 </html>
+ 
